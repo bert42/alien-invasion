@@ -9,15 +9,19 @@ import (
 	"strings"
 	"flag"
 	"strconv"
+    "math/rand"
 
 	"github.com/davecgh/go-spew/spew"
 )
+
+const DEBUG = true
 
 // City represents a City with Name and 4 possible roads to neighbour cities
 // North, East, South, West is either nil or a string to neighbour cities
 type City struct {
 	Name	string
 	Roads 	map[int]string
+    Alien   int
 }
 
 type mapType map[string]City
@@ -37,14 +41,18 @@ func main() {
 	fullMap := buildMap(mapData)
 
 	runSimulation(fullMap, int(numAliens), 10000)
-	spew.Dump(fullMap)
+	_debug(fullMap)
+
 	fmt.Println("Done.")
 }
 
 // Function runSimulation: main simulation loop
 // Input: mapType map data, int number of aliens, int iterations to run
 func runSimulation(fullMap mapType, numAliens int, iterations int) {
-	destroyCity(&fullMap, "Foo")
+    _debug(fmt.Sprintf("Deploying %d aliens into cities...", numAliens))
+    deployAliens(&fullMap, numAliens)
+
+	// destroyCity(&fullMap, "Foo", 1, 2)
 }
 
 
@@ -94,7 +102,6 @@ func buildMap(mapData []string) mapType {
 		cities[cityName] = city
 	}
 
-	spew.Dump(cities)
 	validateRoads(cities)
 
 	return cities
@@ -105,7 +112,7 @@ func buildMap(mapData []string) mapType {
 // Returns: void, but raises exception for validation errors
 func validateRoads(mapData mapType) {
 	for _, city := range mapData {
-		for _, direction := allRoads(city) {
+		for _, direction := range allRoads(city) {
 			if toCityName, toOk := city.Roads[direction]; toOk {
 				if toCity, toCityOk := mapData[toCityName]; toCityOk {
 					if toCity.Roads[oppositeDirection(direction)] != city.Name {
@@ -123,7 +130,7 @@ func validateRoads(mapData mapType) {
 // Function destroyCity: removes a city from mapData, and removes it from neighbour cities as well
 // Input: *mapType mapData, string cityToBeRemoved
 // Returns: -
-func destroyCity(mapData *mapType, cityName string) {
+func destroyCity(mapData *mapType, cityName string, alien1 int, alien2 int) {
 	city  := (*mapData)[cityName]
 
 	for _, direction := range allRoads(city) {
@@ -131,6 +138,28 @@ func destroyCity(mapData *mapType, cityName string) {
 	}
 
 	delete(*mapData, cityName)
+
+    fmt.Printf("%s has been destroyed by alien %d and alien %d\n", cityName, alien1, alien2)
+}
+
+func deployAliens(mapData *mapType, numAliens int)  {
+    for i:=0; i<numAliens; i++ {
+        allCities := allCities(mapData)  // need to re-read city keys as they could be destroyed during deployment
+                                         // FIXME: could be more effective with a caching slice here
+
+        randIndex := rand.Intn(len(allCities))
+        _debug(fmt.Sprintf("Moved alien %d to %s", i, allCities[randIndex]))
+        moveAlienTo(mapData, allCities[randIndex], i)
+    }
+}
+
+func moveAlienTo(mapData *mapType, cityName string, alien int) {
+    city := (*mapData)[cityName]
+    if city.Alien == 0 {  // no alien in this city yet, move him in
+        city.Alien = alien
+    } else {              // already an alien here, so they fight and destroy this city
+        destroyCity(mapData, cityName, city.Alien, alien)
+    }
 }
 
 // Function dirNameToInt: convert a direction name (north, ...) to integer value
@@ -147,6 +176,18 @@ func dirNameToInt(direction string) int {
 // Returns: direction int (eg. 2 for south, etc.)
 func oppositeDirection(direction int) int {
 	return (direction + 2) % 4
+}
+
+func allCities(mapData *mapType) []string {
+    cities := make([]string, len(*mapData))
+
+    i := 0
+    for k := range *mapData {
+        cities[i] = k
+        i++
+    }
+
+    return cities
 }
 
 // Function allRoads: returns a slice of ints with roads from that city, simplifies other loops
@@ -179,3 +220,8 @@ func Usage(exitCode int) {
 	os.Exit(exitCode)
 }
 
+func _debug(obj ...interface{}) {
+    if (!DEBUG) { return }
+
+    spew.Dump(obj)
+}
