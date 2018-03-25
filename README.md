@@ -4,10 +4,6 @@
 
 A simple iterative simulation of a fictional alien invasion in Go
 
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
 ### Prerequisites
 
 You need to install git (https://git-scm.com/downloads) and Go (https://golang.org/dl/) first.
@@ -17,7 +13,7 @@ Also, let Go install required libraries by running:
 go get ./...
 ```
 
-### Usage
+### Getting started
 
 This project simulates an alien invasion on a given map of cities.
 You can find some example map files under examples/, feel free to create your own.
