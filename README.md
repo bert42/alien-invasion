@@ -1,6 +1,7 @@
 # Alien-invasion
 
 [![license](https://img.shields.io/github/license/bert42/alien-invasion.svg)](https://github.com/bert42/alien-invasion/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/bert42/alien-invasion.svg?branch=master)](https://travis-ci.org/bert42/alien-invasion)
 
 A simple iterative simulation of a fictional alien invasion in Go
 
