@@ -1,17 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"io"
-	"bufio"
-	"strings"
-	"flag"
-	"strconv"
+    "fmt"
+    "log"
+    "os"
+    "io"
+    "bufio"
+    "strings"
+    "flag"
+    "strconv"
     "math/rand"
 
-	"github.com/davecgh/go-spew/spew"
+    "github.com/davecgh/go-spew/spew"
 )
 
 const DEBUG = true
@@ -19,8 +19,8 @@ const DEBUG = true
 // City represents a City with Name and 4 possible roads to neighbour cities
 // North, East, South, West is either nil or a string to neighbour cities
 type City struct {
-	Name	string
-	Roads 	map[int]string
+    Name    string
+    Roads   map[int]string
     Alien   int
 }
 
@@ -29,21 +29,21 @@ type mapType map[string]City
 
 
 func main() {
-	flag.Parse()
+    flag.Parse()
 
-	numAliensString := flag.Arg(0)
-	numAliens, err  := strconv.ParseInt(numAliensString, 10, 32)
-	if numAliensString == "" || err != nil {
-		Usage(1)
-	}
+    numAliensString := flag.Arg(0)
+    numAliens, err  := strconv.ParseInt(numAliensString, 10, 32)
+    if numAliensString == "" || err != nil {
+        Usage(1)
+    }
 
-	mapData := readMapData()
-	fullMap := buildMap(mapData)
+    mapData := readMapData()
+    fullMap := buildMap(mapData)
 
-	runSimulation(fullMap, int(numAliens), 10000)
-	_debug(fullMap)
+    runSimulation(fullMap, int(numAliens), 10000)
+    _debug(fullMap)
 
-	fmt.Println("Done.")
+    fmt.Println("Done.")
 }
 
 // Function runSimulation: main simulation loop
@@ -52,7 +52,7 @@ func runSimulation(fullMap mapType, numAliens int, iterations int) {
     _debug(fmt.Sprintf("Deploying %d aliens into cities...", numAliens))
     deployAliens(&fullMap, numAliens)
 
-	// destroyCity(&fullMap, "Foo", 1, 2)
+    // destroyCity(&fullMap, "Foo", 1, 2)
 }
 
 
@@ -60,70 +60,70 @@ func runSimulation(fullMap mapType, numAliens int, iterations int) {
 // Input: -
 // Returns: lines, slice of strings
 func readMapData() []string {
-	var result []string
+    var result []string
 
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		line, err := reader.ReadString('\n')
+    reader := bufio.NewReader(os.Stdin)
+    for {
+        line, err := reader.ReadString('\n')
 
-		if (err != nil) { 
-			if err == io.EOF {
-				break
-			} else {
-				log.Fatal("Can't read stdin: "+err.Error())
-			}
-		}
+        if (err != nil) {
+            if err == io.EOF {
+                break
+            } else {
+                log.Fatal("Can't read stdin: "+err.Error())
+            }
+        }
 
-		result = append(result, strings.TrimSuffix(line, "\r\n"))
-	}
+        result = append(result, strings.TrimSuffix(line, "\r\n"))
+    }
 
-	return result
+    return result
 }
 
 // Function buildMap: builds map hash from lines to Cities
 // Input: stringslice lines
 // Returns: map of City (key: name of City, value: struct City)
 func buildMap(mapData []string) mapType {
-	cities := make(mapType);
+    cities := make(mapType);
 
-	for _, line := range mapData {
-		s := strings.Split(line, " ")
-		cityName := s[0]
-		city := City{
-			Name: cityName,
-			Roads: make(map[int]string),
-		}
+    for _, line := range mapData {
+        s := strings.Split(line, " ")
+        cityName := s[0]
+        city := City{
+            Name: cityName,
+            Roads: make(map[int]string),
+        }
 
-		for _, directionData := range s[1:] {
-			directions := strings.Split(directionData, "=") // splits <direction>=<cityName>
-			city.Roads[dirNameToInt(directions[0])] = directions[1]
-		}
+        for _, directionData := range s[1:] {
+            directions := strings.Split(directionData, "=") // splits <direction>=<cityName>
+            city.Roads[dirNameToInt(directions[0])] = directions[1]
+        }
 
-		cities[cityName] = city
-	}
+        cities[cityName] = city
+    }
 
-	validateRoads(cities)
+    validateRoads(cities)
 
-	return cities
+    return cities
 }
 
 // Function validateRoads: walks all defined roads and validates the source and destination points
 // Input: mapType mapData with full map
 // Returns: void, but raises exception for validation errors
 func validateRoads(mapData mapType) {
-	for _, city := range mapData {
-		for _, direction := range allRoads(city) {
-			if toCityName, toOk := city.Roads[direction]; toOk {
-				if toCity, toCityOk := mapData[toCityName]; toCityOk {
-					if toCity.Roads[oppositeDirection(direction)] != city.Name {
-						log.Fatalf("Map validation error: no back-road to %s from %s, but should be", toCity.Roads[oppositeDirection(direction)], city.Name)
-					}
-				} else {
-					log.Fatalf("Map validation error: road to %s from %s, but %s not found on map", toCityName, city.Name, toCityName)
-				}
-			}
-		}
-	}
+    for _, city := range mapData {
+        for _, direction := range allRoads(city) {
+            if toCityName, toOk := city.Roads[direction]; toOk {
+                if toCity, toCityOk := mapData[toCityName]; toCityOk {
+                    if toCity.Roads[oppositeDirection(direction)] != city.Name {
+                        log.Fatalf("Map validation error: no back-road to %s from %s, but should be", toCity.Roads[oppositeDirection(direction)], city.Name)
+                    }
+                } else {
+                    log.Fatalf("Map validation error: road to %s from %s, but %s not found on map", toCityName, city.Name, toCityName)
+                }
+            }
+        }
+    }
 }
 
 
@@ -131,13 +131,13 @@ func validateRoads(mapData mapType) {
 // Input: *mapType mapData, string cityToBeRemoved
 // Returns: -
 func destroyCity(mapData *mapType, cityName string, alien1 int, alien2 int) {
-	city  := (*mapData)[cityName]
+    city  := (*mapData)[cityName]
 
-	for _, direction := range allRoads(city) {
-		delete((*mapData)[city.Roads[direction]].Roads, oppositeDirection(direction))
-	}
+    for _, direction := range allRoads(city) {
+        delete((*mapData)[city.Roads[direction]].Roads, oppositeDirection(direction))
+    }
 
-	delete(*mapData, cityName)
+    delete(*mapData, cityName)
 
     fmt.Printf("%s has been destroyed by alien %d and alien %d\n", cityName, alien1, alien2)
 }
@@ -166,16 +166,16 @@ func moveAlienTo(mapData *mapType, cityName string, alien int) {
 // Input: string direction
 // Returns: integer representation of direction
 func dirNameToInt(direction string) int {
-	dirHash := map[string]int{"north": 0, "east": 1, "south": 2, "west": 3}
+    dirHash := map[string]int{"north": 0, "east": 1, "south": 2, "west": 3}
 
-	return dirHash[direction]
+    return dirHash[direction]
 }
 
 // Function oppositeDirection: returns the int representation of oppsite direction
 // Input: direction int (eg. north is 0, etc.)
 // Returns: direction int (eg. 2 for south, etc.)
 func oppositeDirection(direction int) int {
-	return (direction + 2) % 4
+    return (direction + 2) % 4
 }
 
 func allCities(mapData *mapType) []string {
@@ -209,15 +209,15 @@ func allRoads(city City) []int {
 // Input: int exitCode
 // Returns: -
 func Usage(exitCode int) {
-	fmt.Println(`Alien-Invasion
+    fmt.Println(`Alien-Invasion
 
-		Reads in pre-defined map data from given map file (txt format), then
-		runs simulation of N aliens wandering in cities fighting when met.
+        Reads in pre-defined map data from given map file (txt format), then
+        runs simulation of N aliens wandering in cities fighting when met.
 
-		Usage: alien-invasion <number of aliens>
-		`)
+        Usage: alien-invasion <number of aliens>
+        `)
 
-	os.Exit(exitCode)
+    os.Exit(exitCode)
 }
 
 func _debug(obj ...interface{}) {
