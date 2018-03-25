@@ -36,16 +36,15 @@ func main() {
 	mapData := readMapData()
 	fullMap := buildMap(mapData)
 
-	spew.Dump(fullMap)
-
 	runSimulation(fullMap, int(numAliens), 10000)
+	spew.Dump(fullMap)
 	fmt.Println("Done.")
 }
 
 // Function runSimulation: main simulation loop
 // Input: mapType map data, int number of aliens, int iterations to run
 func runSimulation(fullMap mapType, numAliens int, iterations int) {
-	fmt.Println(fullMap, numAliens, iterations)
+	destroyCity(&fullMap, "Foo")
 }
 
 
@@ -95,9 +94,45 @@ func buildMap(mapData []string) mapType {
 		cities[cityName] = city
 	}
 
-	//TODO: needs validation for roads between cities point both directions
+	spew.Dump(cities)
+	validateRoads(cities)
 
 	return cities
+}
+
+// Function validateRoads: walks all defined roads and validates the source and destination points
+// Input: mapType mapData with full map
+// Returns: void, but raises exception for validation errors
+func validateRoads(mapData mapType) {
+	for _, city := range mapData {
+		for direction := 0; direction < 4; direction++ {
+			if toCityName, toOk := city.Roads[direction]; toOk {
+				if toCity, toCityOk := mapData[toCityName]; toCityOk {
+					if toCity.Roads[oppositeDirection(direction)] != city.Name {
+						log.Fatalf("Map validation error: no back-road to %s from %s, but should be", toCity.Roads[oppositeDirection(direction)], city.Name)
+					}
+				} else {
+					log.Fatalf("Map validation error: road to %s from %s, but %s not found on map", toCityName, city.Name, toCityName)
+				}
+			}
+		}
+	}
+}
+
+
+// Function destroyCity: removes a city from mapData, and removes it from neighbour cities as well
+// Input: *mapType mapData, string cityToBeRemoved
+// Returns: -
+func destroyCity(mapData *mapType, cityName string) {
+	city := (*mapData)[cityName]
+
+	for direction := 0; direction < 4; direction++ {
+		if toCityName, toOk := city.Roads[direction]; toOk {
+			delete((*mapData)[toCityName].Roads, oppositeDirection(direction))
+		}
+	}
+
+	delete(*mapData, cityName)
 }
 
 // Function dirNameToInt: convert a direction name (north, ...) to integer value
@@ -107,6 +142,13 @@ func dirNameToInt(direction string) int {
 	dirHash := map[string]int{"north": 0, "east": 1, "south": 2, "west": 3}
 
 	return dirHash[direction]
+}
+
+// Function oppositeDirection: returns the int representation of oppsite direction
+// Input: direction int (eg. north is 0, etc.)
+// Returns: direction int (eg. 2 for south, etc.)
+func oppositeDirection(direction int) int {
+	return (direction + 2) % 4
 }
 
 
