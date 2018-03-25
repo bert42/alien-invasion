@@ -1,5 +1,7 @@
 # Alien-invasion
 
+[![license](https://img.shields.io/github/license/bert42/alien-invasion.svg)](https://github.com/bert42/alien-invasion/blob/master/LICENSE)
+
 A simple iterative simulation of a fictional alien invasion in Go
 
 ## Getting Started
