@@ -1,0 +1,15 @@
+language: go
+go_import_path: github.com/bert42/alien-invasion
+go:
+  - 1.9.x
+  - 1.10.x
+  - tip
+sudo: false
+install:
+  - go get github.com/davecgh/go-spew/spew
+  - go build ./...
+script:
+  - go test -v cmd/alien-invasion/main.go
+after_success:
+  - go get -v github.com/mattn/goveralls
+  - goveralls -coverprofile=profile.cov -service=travis-ci
