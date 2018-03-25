@@ -26,7 +26,12 @@ type City struct {
 
 type mapType map[string]*City
 
+var iteration int
+var maxCities int
 
+func init() {
+    iteration = 0
+}
 
 func main() {
     flag.Parse()
@@ -37,20 +42,25 @@ func main() {
         Usage(1)
     }
 
-    mapData := readMapData()
-    fullMap := buildMap(mapData)
+    mapRawData := readMapData()
+    mapData    := buildMap(mapRawData)
+    maxCities  := len(allCities(&mapData)); _ = maxCities // I hate this...
 
-    runSimulation(fullMap, int(numAliens), 10000)
-    _debug(fullMap)
+    runSimulation(&mapData, int(numAliens), 10000)
+    _debug(mapData)
 
     fmt.Println("Done.")
 }
 
 // Function runSimulation: main simulation loop
 // Input: mapType map data, int number of aliens, int iterations to run
-func runSimulation(fullMap mapType, numAliens int, iterations int) {
+func runSimulation(mapData *mapType, numAliens int, iterations int) {
     _debug(fmt.Sprintf("Deploying %d aliens into cities...", numAliens))
-    deployAliens(&fullMap, numAliens)
+    deployAliens(mapData, numAliens)
+
+    for iteration=1; iteration<=iterations; iteration++ {
+        moveAliens(mapData)
+    }
 
     // destroyCity(&fullMap, "Foo", 1, 2)
 }
@@ -130,7 +140,7 @@ func validateRoads(mapData mapType) {
 // Function destroyCity: removes a city from mapData, and removes it from neighbour cities as well
 // Input: *mapType mapData, string cityToBeRemoved
 // Returns: -
-func destroyCity(mapData *mapType, cityName string, iteration int, alien1 int, alien2 int) {
+func destroyCity(mapData *mapType, cityName string, alien1 int, alien2 int) {
     city  := (*mapData)[cityName]
 
     for _, direction := range allRoads(city) {
@@ -140,37 +150,52 @@ func destroyCity(mapData *mapType, cityName string, iteration int, alien1 int, a
     delete(*mapData, cityName)
 
     log.Printf("[iter %5d] %s has been destroyed by alien %d and alien %d\n", iteration, cityName, alien1, alien2)
+    assertAnyCitiesLeft(mapData)
 }
 
 func deployAliens(mapData *mapType, numAliens int)  {
-    maxCities := len(allCities(mapData))
-    iteration := 0
-
     for i:=1; i<=numAliens; i++ {
         allCities := allCities(mapData)  // need to re-read city keys as they could be destroyed during deployment
                                          // FIXME: could be more effective with a caching slice here
         numCities := len(allCities)
-        if numCities == 0 {
-            log.Printf("[iter %5d] all cities (%d) have been destroyed after deploying %d aliens, %d aliens not yet deployed", iteration, maxCities, i, numAliens-i)
-            os.Exit(0)
-        }
 
         randIndex := rand.Intn(numCities)
         // _debug(fmt.Sprintf("Moved alien %d to %s", i, allCities[randIndex]))
-        moveAlienTo(mapData, allCities[randIndex], iteration, i)
+        moveAlienTo(mapData, allCities[randIndex], i)
     }
 }
 
-//func moveAliens {}
+func moveAliens(mapData *mapType) {
+    allCities := allCities(mapData)
 
-func moveAlienTo(mapData *mapType, cityName string, iteration int, alien int) {
+    for _, cityName := range allCities {
+        if city, ok := (*mapData)[cityName]; ok {
+            if roads := allRoads(city); len(roads) > 0 {
+                directionIndex := rand.Intn(len(roads))
+                cityTo := city.Roads[roads[directionIndex]]
+                moveAlienTo(mapData, cityTo, city.Alien)
+                city.Alien = 0 // moved out from this city
+            }
+        } // else this city has been already destroyed in movements phase
+    }
+}
+
+func moveAlienTo(mapData *mapType, cityName string, alien int) {
     city := (*mapData)[cityName]
 
     if city.Alien == 0 {  // no alien in this city yet, move him in
         city.Alien = alien
     } else {              // already an alien here, so they fight and destroy this city
-        destroyCity(mapData, cityName, iteration, city.Alien, alien)
+        destroyCity(mapData, cityName, city.Alien, alien)
     }
+}
+
+func assertAnyCitiesLeft(mapData *mapType) {
+    if len(allCities(mapData)) == 0 {
+        log.Printf("[iter %5d] all cities (%d) have been destroyed", iteration, maxCities)
+        os.Exit(0)
+    }
+
 }
 
 // Function dirNameToInt: convert a direction name (north, ...) to integer value
