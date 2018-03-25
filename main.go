@@ -105,7 +105,7 @@ func buildMap(mapData []string) mapType {
 // Returns: void, but raises exception for validation errors
 func validateRoads(mapData mapType) {
 	for _, city := range mapData {
-		for direction := 0; direction < 4; direction++ {
+		for _, direction := allRoads(city) {
 			if toCityName, toOk := city.Roads[direction]; toOk {
 				if toCity, toCityOk := mapData[toCityName]; toCityOk {
 					if toCity.Roads[oppositeDirection(direction)] != city.Name {
@@ -124,12 +124,10 @@ func validateRoads(mapData mapType) {
 // Input: *mapType mapData, string cityToBeRemoved
 // Returns: -
 func destroyCity(mapData *mapType, cityName string) {
-	city := (*mapData)[cityName]
+	city  := (*mapData)[cityName]
 
-	for direction := 0; direction < 4; direction++ {
-		if toCityName, toOk := city.Roads[direction]; toOk {
-			delete((*mapData)[toCityName].Roads, oppositeDirection(direction))
-		}
+	for _, direction := range allRoads(city) {
+		delete((*mapData)[city.Roads[direction]].Roads, oppositeDirection(direction))
 	}
 
 	delete(*mapData, cityName)
@@ -151,6 +149,20 @@ func oppositeDirection(direction int) int {
 	return (direction + 2) % 4
 }
 
+// Function allRoads: returns a slice of ints with roads from that city, simplifies other loops
+// Input: City city
+// Returns: []int roads
+func allRoads(city City) []int {
+    var roads []int;
+
+    for direction := 0; direction < 4; direction++ {
+        if _, toOk := city.Roads[direction]; toOk {
+            roads = append(roads, direction)
+        }
+    }
+
+    return roads;
+}
 
 // Function Usage: prints usage info to terminal and exits
 // Input: int exitCode
