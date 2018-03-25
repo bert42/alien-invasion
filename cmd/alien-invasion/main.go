@@ -170,7 +170,7 @@ func moveAliens(mapData *mapType) {
 
     for _, cityName := range allCities {
         if city, ok := (*mapData)[cityName]; ok {
-            if roads := allRoads(city); len(roads) > 0 {
+            if roads := allRoads(city); len(roads) > 0 { // there are still roads out of this city
                 directionIndex := rand.Intn(len(roads))
                 cityTo := city.Roads[roads[directionIndex]]
                 moveAlienTo(mapData, cityTo, city.Alien)
