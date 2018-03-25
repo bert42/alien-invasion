@@ -11,6 +11,11 @@ These instructions will get you a copy of the project up and running on your loc
 ### Prerequisites
 
 You need to install git (https://git-scm.com/downloads) and Go (https://golang.org/dl/) first.
+Also, let Go install required libraries by running:
+
+```
+go get ./...
+```
 
 ### Usage
 
