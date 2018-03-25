@@ -24,7 +24,7 @@ type City struct {
     Alien   int
 }
 
-type mapType map[string]City
+type mapType map[string]*City
 
 
 
@@ -89,7 +89,7 @@ func buildMap(mapData []string) mapType {
     for _, line := range mapData {
         s := strings.Split(line, " ")
         cityName := s[0]
-        city := City{
+        city := &City{
             Name: cityName,
             Roads: make(map[int]string),
         }
@@ -130,7 +130,7 @@ func validateRoads(mapData mapType) {
 // Function destroyCity: removes a city from mapData, and removes it from neighbour cities as well
 // Input: *mapType mapData, string cityToBeRemoved
 // Returns: -
-func destroyCity(mapData *mapType, cityName string, alien1 int, alien2 int) {
+func destroyCity(mapData *mapType, cityName string, iteration int, alien1 int, alien2 int) {
     city  := (*mapData)[cityName]
 
     for _, direction := range allRoads(city) {
@@ -139,26 +139,37 @@ func destroyCity(mapData *mapType, cityName string, alien1 int, alien2 int) {
 
     delete(*mapData, cityName)
 
-    fmt.Printf("%s has been destroyed by alien %d and alien %d\n", cityName, alien1, alien2)
+    log.Printf("[iter %5d] %s has been destroyed by alien %d and alien %d\n", iteration, cityName, alien1, alien2)
 }
 
 func deployAliens(mapData *mapType, numAliens int)  {
-    for i:=0; i<numAliens; i++ {
+    maxCities := len(allCities(mapData))
+    iteration := 0
+
+    for i:=1; i<=numAliens; i++ {
         allCities := allCities(mapData)  // need to re-read city keys as they could be destroyed during deployment
                                          // FIXME: could be more effective with a caching slice here
+        numCities := len(allCities)
+        if numCities == 0 {
+            log.Printf("[iter %5d] all cities (%d) have been destroyed after deploying %d aliens, %d aliens not yet deployed", iteration, maxCities, i, numAliens-i)
+            os.Exit(0)
+        }
 
-        randIndex := rand.Intn(len(allCities))
-        _debug(fmt.Sprintf("Moved alien %d to %s", i, allCities[randIndex]))
-        moveAlienTo(mapData, allCities[randIndex], i)
+        randIndex := rand.Intn(numCities)
+        // _debug(fmt.Sprintf("Moved alien %d to %s", i, allCities[randIndex]))
+        moveAlienTo(mapData, allCities[randIndex], iteration, i)
     }
 }
 
-func moveAlienTo(mapData *mapType, cityName string, alien int) {
+//func moveAliens {}
+
+func moveAlienTo(mapData *mapType, cityName string, iteration int, alien int) {
     city := (*mapData)[cityName]
+
     if city.Alien == 0 {  // no alien in this city yet, move him in
         city.Alien = alien
     } else {              // already an alien here, so they fight and destroy this city
-        destroyCity(mapData, cityName, city.Alien, alien)
+        destroyCity(mapData, cityName, iteration, city.Alien, alien)
     }
 }
 
@@ -193,7 +204,7 @@ func allCities(mapData *mapType) []string {
 // Function allRoads: returns a slice of ints with roads from that city, simplifies other loops
 // Input: City city
 // Returns: []int roads
-func allRoads(city City) []int {
+func allRoads(city *City) []int {
     var roads []int;
 
     for direction := 0; direction < 4; direction++ {
