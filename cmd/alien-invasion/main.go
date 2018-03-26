@@ -98,7 +98,9 @@ func readMapData(fileName string) []string {
 			}
 		}
 
-		result = append(result, strings.TrimSuffix(line, "\r\n"))
+		line = strings.TrimSuffix(line, "\n");
+		line = strings.TrimSuffix(line, "\r");
+		result = append(result, line)
 	}
 
 	return result
