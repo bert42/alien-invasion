@@ -31,6 +31,8 @@ func TestDirections(t *testing.T) {
     }
 
     roads := invasion.AllRoads(&city)
-    t.Log(roads)
+    if len(roads) != 2 {
+        t.Fatalf("Number of roads differ, got: %d, want: %d", len(roads), 2)
+    }
 
 }

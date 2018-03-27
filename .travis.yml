@@ -1,7 +1,6 @@
 language: go
 go_import_path: github.com/bert42/alien-invasion
 go:
-  - 1.9.x
   - 1.10.x
   - tip
 sudo: false
