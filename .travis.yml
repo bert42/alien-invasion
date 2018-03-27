@@ -7,7 +7,7 @@ go:
 sudo: false
 install:
   - go get github.com/davecgh/go-spew/spew
-  - go build ./...
+  - go build cmd/alien-invasion/main.go
 script:
   - go test -v cmd/alien-invasion/invasion_test.go
 after_success:
