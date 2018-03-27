@@ -14,7 +14,7 @@ func TestBuildMap(t *testing.T) {
         t.Fatalf("Unable to open test map %s", mapfile1)
     }
 
-    simulation := &invasion.Invasion{}
+    simulation := invasion.New()
     simulation.BuildMap(mapfile1)
 
     cities := simulation.AllCities()

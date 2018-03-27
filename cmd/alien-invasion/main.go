@@ -22,16 +22,21 @@ func main() {
 
 	mapFile := flag.String("map", "examples/testmap1.txt", "map file path")
 	numAliens := flag.Int("aliens", 3, "number of aliens to be deployed")
-	debug := flag.Bool("debug", false, "debug mode dumps map definitions")
+	debug := flag.Bool("debug", false, "dumps map definitions")
+	verbose := flag.Bool("verbose", false, "display more statistics")
 
 	flag.Parse()
 
-	invasion.DEBUG = *debug
-
-	Simulation := &invasion.Invasion{}
+	Simulation := invasion.New()
 	Simulation.BuildMap(*mapFile)
 
 	Simulation.Run(int(*numAliens), 10000)
-//	Simulation.Dump()
+
+	if (*verbose) {
+		fmt.Println(Simulation.VerboseLog)
+	}
+	if (*debug) {
+		fmt.Println(Simulation.DebugLog)
+	}
 }
 
