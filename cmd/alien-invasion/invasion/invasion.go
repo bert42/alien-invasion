@@ -30,6 +30,7 @@ type Invasion struct {
     MaxCities int
 }
 
+// Invasion constructor, sets default values for struct
 func New() *Invasion {
     return &Invasion{
         VerboseLog: make([]string, 0),
@@ -44,9 +45,14 @@ func (data *Invasion) Run(numAliens int, iterations int) {
     data.verbose(fmt.Sprintf("Deploying %d aliens into cities...", numAliens))
     data.Deploy(numAliens)
 
-    for data.Iteration = 1; data.Iteration <= iterations; data.Iteration++ {
+    for data.Iteration = 1; data.Iteration < iterations; data.Iteration++ {
         data.Move()
+        if isAny := data.AnyCitiesLeft(); !isAny {
+            data.Print(fmt.Sprintf("all cities (%d) have been destroyed", data.MaxCities))
+            return
+        }
     }
+    data.Print(fmt.Sprintf("simulation terminated after %d iterations", data.Iteration))
 }
 
 // Reads in data from map file, removes line endings, returns all lines
@@ -133,8 +139,7 @@ func (data *Invasion) DestroyCity(cityName string, alien1 int, alien2 int) {
 
     delete(data.Map, cityName)
 
-    log.Printf("[iter %5d] %s has been destroyed by alien %d and alien %d\n", data.Iteration, cityName, alien1, alien2)
-    data.AssertAnyCitiesLeft()
+    data.Print(fmt.Sprintf("%s has been destroyed by alien %d and alien %d\n", cityName, alien1, alien2))
 }
 
 // initially deploys aliens into cities randomly, takes care of 2 aliens in the same city destroys the city
@@ -180,12 +185,9 @@ func (data *Invasion) MoveAlienTo(cityName string, alien int) {
     }
 }
 
-// terminates the simulation if all of the cities have been destroyed
-func (data *Invasion) AssertAnyCitiesLeft() {
-    if len(data.AllCities()) == 0 {
-        log.Printf("[iter %5d] all cities (%d) have been destroyed", data.Iteration, data.MaxCities)
-        os.Exit(0)
-    }
+// returns false if all of the cities have been destroyed
+func (data *Invasion) AnyCitiesLeft() bool {
+    return len(data.AllCities()) != 0
 }
 
 // convert a direction name (north, ...) to integer value
@@ -224,6 +226,11 @@ func AllRoads(city *City) []int {
     }
 
     return roads
+}
+
+// prints string in log format with iterations prefix
+func (data *Invasion) Print(s string) {
+    log.Printf("[iter %5d] %s", data.Iteration, s)
 }
 
 // debug, dumps full map data

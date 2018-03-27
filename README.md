@@ -55,7 +55,7 @@ The program will print a line when a city is destroyed (noting the iteration num
 Simple Go tests are provided:
 
 ```
-go test cmd/alien-invasion
+go test -v cmd/alien-invasion/*test.go
 ```
 
 ## Authors
