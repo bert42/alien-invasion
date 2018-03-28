@@ -1,3 +1,6 @@
+// package invasion represents a simulation of an alien invasion on a pre-defined
+// map; it deploys aliens, let them wander using the defined roads between cities
+// and handle their (and the city's) destruction whenever they meet
 package invasion
 
 import (
@@ -8,6 +11,7 @@ import (
     "math/rand"
     "os"
     "strings"
+    "errors"
 
     "github.com/davecgh/go-spew/spew"
 )
@@ -30,7 +34,7 @@ type Invasion struct {
     MaxCities int
 }
 
-// Invasion constructor, sets default values for struct
+// New constructs a new Invasion, sets up default values
 func New() *Invasion {
     return &Invasion{
         VerboseLog: make([]string, 0),
@@ -40,7 +44,7 @@ func New() *Invasion {
     }
 }
 
-// Runs the main simulation loop: deploys and moves aliens, prints events
+// Run starts the main simulation loop: deploys and moves aliens, prints events
 func (data *Invasion) Run(numAliens int, iterations int) {
     data.verbose(fmt.Sprintf("Deploying %d aliens into cities...", numAliens))
     data.Deploy(numAliens)
@@ -55,10 +59,8 @@ func (data *Invasion) Run(numAliens int, iterations int) {
     data.Print(fmt.Sprintf("simulation terminated after %d iterations", data.Iteration))
 }
 
-// Reads in data from map file, removes line endings, returns all lines
-func (data *Invasion) ReadMap(fileName string) []string {
-    var result []string
-
+// ReadMap reads in data from map file, removes line endings, returns all lines
+func (data *Invasion) ReadMap(fileName string) (result []string) {
     file, err := os.Open(fileName)
     if err != nil {
         log.Fatal(err)
@@ -85,7 +87,7 @@ func (data *Invasion) ReadMap(fileName string) []string {
     return result
 }
 
-// builds map hash from lines into Cities, stores map data in caller struct
+// BuildMap builds map struct from lines into Cities, stores map data in Invasion.Map
 func (data *Invasion) BuildMap(fileName string) {
     mapLines := data.ReadMap(fileName)
 
@@ -109,27 +111,33 @@ func (data *Invasion) BuildMap(fileName string) {
 
     data.Map = cities
     data.MaxCities = len(data.AllCities())
-    data.ValidateRoads()
+    if err := data.ValidateRoads(); err != nil {
+        log.Fatalf(err.Error())
+    }
 }
 
-// walks all defined roads and validates the source and destination points, bails if missing cities found
-func (data *Invasion) ValidateRoads() {
+// ValidateRoads walks all defined roads and validates the source and destination
+// points, returns error if missing cities are found, describing the problem
+func (data *Invasion) ValidateRoads() error {
     for _, city := range data.Map {
         for _, direction := range AllRoads(city) {
             if toCityName, toOk := city.Roads[direction]; toOk {
                 if toCity, toCityOk := data.Map[toCityName]; toCityOk {
                     if toCity.Roads[oppositeDirection(direction)] != city.Name {
-                        log.Fatalf("Map validation error: no back-road to %s from %s, but should be", toCity.Roads[oppositeDirection(direction)], city.Name)
+                        return errors.New(fmt.Sprintf("Map validation error: no back-road to %s from %s, but should be", toCity.Roads[oppositeDirection(direction)], city.Name))
                     }
                 } else {
-                    log.Fatalf("Map validation error: road to %s from %s, but %s not found on map", toCityName, city.Name, toCityName)
+                    return errors.New(fmt.Sprintf("Map validation error: road to %s from %s, but %s not found on map", toCityName, city.Name, toCityName))
                 }
             }
         }
     }
+
+    return nil
 }
 
-// removes a city from map, and removes it from neighbour cities as well, prints destruction fact
+// DestroyCity removes a city from map, and removes it from neighbour cities
+// prints destruction fact
 func (data *Invasion) DestroyCity(cityName string, alien1 int, alien2 int) {
     city := data.Map[cityName]
 
@@ -142,7 +150,7 @@ func (data *Invasion) DestroyCity(cityName string, alien1 int, alien2 int) {
     data.Print(fmt.Sprintf("%s has been destroyed by alien %d and alien %d\n", cityName, alien1, alien2))
 }
 
-// initially deploys aliens into cities randomly, takes care of 2 aliens in the same city destroys the city
+// Deploy initially deploys aliens into cities randomly, takes care of 2 aliens in the same city destroys the city
 func (data *Invasion) Deploy(numAliens int) {
     for i := 1; i <= numAliens; i++ {
         allCities := data.AllCities() // need to re-read city keys as they could be destroyed during deployment
@@ -155,7 +163,7 @@ func (data *Invasion) Deploy(numAliens int) {
     data.debug(data.Map)
 }
 
-// iterates over all cities and moves aliens if roads are still present
+// Move iterates over all cities and moves aliens if any road is still present in that city
 func (data *Invasion) Move() {
     allCities := data.AllCities()
 
@@ -174,7 +182,7 @@ func (data *Invasion) Move() {
     }
 }
 
-// moves alien into a City, calls destroy if another alien is already there
+// MoveAlienTo moves alien into a City, calls destroy if another alien is already there
 func (data *Invasion) MoveAlienTo(cityName string, alien int) {
     city := data.Map[cityName]
 
@@ -185,24 +193,24 @@ func (data *Invasion) MoveAlienTo(cityName string, alien int) {
     }
 }
 
-// returns false if all of the cities have been destroyed
+// AnyCitiesLeft returns false if all of the cities have been destroyed
 func (data *Invasion) AnyCitiesLeft() bool {
     return len(data.AllCities()) != 0
 }
 
-// convert a direction name (north, ...) to integer value
+// dirNameToInt convert a direction name (north, ...) to integer value
 func dirNameToInt(direction string) int {
     dirHash := map[string]int{"north": 0, "east": 1, "south": 2, "west": 3}
 
     return dirHash[direction]
 }
 
-// returns the int representation of oppsite direction
+// oppositeDirection returns the int representation of opposite direction from a city
 func oppositeDirection(direction int) int {
     return (direction + 2) % 4
 }
 
-// returns all city names of full map
+// AllCities returns all city names present on the full map
 func (data *Invasion) AllCities() []string {
     cities := make([]string, len(data.Map))
 
@@ -215,10 +223,8 @@ func (data *Invasion) AllCities() []string {
     return cities
 }
 
-// returns a slice of ints with roads from that city, simplifies other loops
-func AllRoads(city *City) []int {
-    var roads []int
-
+// ALlRoads returns a slice of ints with roads from that city, simplifies other loops
+func AllRoads(city *City) (roads []int) {
     for direction := 0; direction < 4; direction++ {
         if _, toOk := city.Roads[direction]; toOk {
             roads = append(roads, direction)
@@ -228,22 +234,22 @@ func AllRoads(city *City) []int {
     return roads
 }
 
-// prints string in log format with iterations prefix
+// Print outputs string in log format with iterations prefix
 func (data *Invasion) Print(s string) {
     log.Printf("[iter %5d] %s", data.Iteration, s)
 }
 
-// debug, dumps full map data
+// Dump dumps full map data for debugging purposes
 func (data *Invasion) Dump() {
     spew.Dump(data)
 }
 
-// internal verbose printer, collects output in VerboseLog
+// verbose is an internal verbose printer, collects output in VerboseLog
 func (data *Invasion) verbose(str string) {
     data.VerboseLog = append(data.VerboseLog, str)
 }
 
-// internal debug printer, collects output in DebugLog
+// debug is an internal debug printer, collects output in DebugLog
 func (data *Invasion) debug(obj ...interface{}) {
     data.DebugLog = append(data.DebugLog, spew.Sdump(obj))
 }
