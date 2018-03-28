@@ -9,6 +9,7 @@ import (
     "io"
     "log"
     "math/rand"
+    "time"
     "os"
     "strings"
     "errors"
@@ -36,6 +37,8 @@ type Invasion struct {
 
 // New constructs a new Invasion, sets up default values
 func New() *Invasion {
+    rand.Seed(time.Now().UTC().UnixNano())
+
     return &Invasion{
         VerboseLog: make([]string, 0),
         DebugLog: make([]string, 0),
