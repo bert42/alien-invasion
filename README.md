@@ -8,9 +8,12 @@ A simple iterative simulation of a fictional alien invasion in Go
 ## Prerequisites
 
 You need to install git (https://git-scm.com/downloads) and Go (https://golang.org/dl/) first.
-Also, let Go install required libraries by running:
+Also, set the current GOPATH to the current dir and let Go install required libraries by running (assuming a Linux/Unix environment):
 
 ```
+git clone https://github.com/bert42/alien-invasion
+cd alien-invasion
+export GOPATH=`pwd`
 go get ./...
 ```
 
@@ -44,7 +47,7 @@ the same city, they start a fight and in the process kill each other and destroy
 from the map along with any roads to and from it.
 Simulation runs until 10.000 iterations, or until all aliens are destroyed.
 
-The program will print a line when a city is destroyed (noting the iteration number), like:
+The program will print a line when a city is destroyed (please note the iteration number), like:
 
 ```
 2018/03/25 20:26:55 [iter     0] Bar has been destroyed by alien 1 and alien 2
@@ -57,6 +60,12 @@ Simple Go tests are provided:
 ```
 go test -v cmd/alien-invasion/*test.go
 ```
+
+## TODO
+
+* **dep** for library version dependency tracking
+* concurrency for Alien moves
+* map visualizer, simulation visualizer
 
 ## Authors
 
