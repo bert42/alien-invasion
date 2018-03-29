@@ -66,6 +66,8 @@ go test -v cmd/alien-invasion/*test.go
 * **dep** for library version dependency tracking
 * concurrency for Alien moves
 * map visualizer, simulation visualizer
+* map generator option to _drop_ number of cities
+* map generator option to leave out roads between cities (percent of roads missing?)
 
 ## Authors
 
