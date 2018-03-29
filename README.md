@@ -53,6 +53,41 @@ The program will print a line when a city is destroyed (please note the iteratio
 2018/03/25 20:26:55 [iter     0] Bar has been destroyed by alien 1 and alien 2
 ```
 
+An example run on a 25x25 full map:
+
+```
+$ go run cmd/alien-invasion/main.go -map examples/testmap25x25.txt -aliens 51
+2018/03/29 22:45:56 [iter     0] City_2_18 has been destroyed by alien 33 and alien 51
+2018/03/29 22:45:56 [iter     1] City_6_10 has been destroyed by alien 4 and alien 50
+2018/03/29 22:45:56 [iter     1] City_9_8 has been destroyed by alien 34 and alien 46
+2018/03/29 22:45:56 [iter     1] City_18_3 has been destroyed by alien 3 and alien 16
+2018/03/29 22:45:56 [iter     1] City_24_13 has been destroyed by alien 13 and alien 25
+2018/03/29 22:45:56 [iter     1] City_22_19 has been destroyed by alien 38 and alien 48
+2018/03/29 22:45:56 [iter     1] City_23_21 has been destroyed by alien 10 and alien 44
+2018/03/29 22:45:56 [iter     3] City_17_14 has been destroyed by alien 40 and alien 24
+2018/03/29 22:45:56 [iter     4] City_3_4 has been destroyed by alien 41 and alien 20
+2018/03/29 22:45:56 [iter     4] City_7_11 has been destroyed by alien 18 and alien 22
+2018/03/29 22:45:56 [iter     5] City_13_24 has been destroyed by alien 32 and alien 17
+2018/03/29 22:45:56 [iter     5] City_9_6 has been destroyed by alien 15 and alien 9
+2018/03/29 22:45:56 [iter     6] City_17_25 has been destroyed by alien 26 and alien 8
+2018/03/29 22:45:56 [iter     6] City_21_14 has been destroyed by alien 19 and alien 42
+2018/03/29 22:45:56 [iter     9] City_11_19 has been destroyed by alien 45 and alien 43
+2018/03/29 22:45:56 [iter    14] City_5_17 has been destroyed by alien 27 and alien 7
+2018/03/29 22:45:56 [iter    15] City_1_21 has been destroyed by alien 31 and alien 49
+2018/03/29 22:45:56 [iter    21] City_24_9 has been destroyed by alien 23 and alien 35
+2018/03/29 22:45:56 [iter    24] City_24_5 has been destroyed by alien 47 and alien 11
+2018/03/29 22:45:56 [iter    26] City_20_22 has been destroyed by alien 14 and alien 6
+2018/03/29 22:45:56 [iter    36] City_12_9 has been destroyed by alien 39 and alien 21
+2018/03/29 22:45:56 [iter    48] City_11_8 has been destroyed by alien 36 and alien 1
+2018/03/29 22:45:56 [iter    54] City_19_13 has been destroyed by alien 2 and alien 5
+2018/03/29 22:45:56 [iter   107] City_16_4 has been destroyed by alien 30 and alien 12
+2018/03/29 22:45:56 [iter   244] City_16_21 has been destroyed by alien 37 and alien 28
+2018/03/29 22:45:57 [iter 10000] simulation terminated after 10000 iterations
+2018/03/29 22:45:57 [iter 10000] Statistics:
+2018/03/29 22:45:57 [iter 10000]    number of moves executed: 19159
+2018/03/29 22:45:57 [iter 10000]    25 cities were destroyed out of 625, 600 remained
+```
+
 ## Utilities
 
 The util/ directory contains some utility scripts: a full-mesh **map generator** (you
