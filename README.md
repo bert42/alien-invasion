@@ -53,16 +53,42 @@ The program will print a line when a city is destroyed (please note the iteratio
 2018/03/25 20:26:55 [iter     0] Bar has been destroyed by alien 1 and alien 2
 ```
 
+## Utilities
+
+The util/ directory contains some utility scripts: a full-mesh **map generator** (you
+can provide the width and height and it will generate a map full of cities, all
+iter-connected):
+
+```
+$ go run util/map_generator.go -width 20 -height 10 -out my_10x20_map.txt
+Written 200 lines into file my_10x20_map.txt
+```
+
+And a **map visualizer**, which is not yet functional in the current release, but will be fixed soon:
+
+```
+$ go run util/map_visualizer.go -map examples/testmap1.txt
+
+[][]string{
+    {"B", "Q", "B"},
+    {" ", " ", "F"},
+}
+```
+
 ## Running the tests
 
-Simple Go tests are provided:
+Simple Go tests are provided for invasion package:
 
 ```
 go test -v cmd/alien-invasion/*test.go
 ```
 
+You can check the status of latest Travis builds at https://travis-ci.org/bert42/alien-invasion
+
+
 ## TODO
 
+* code coverage report
 * **dep** for library version dependency tracking
 * concurrency for Alien moves
 * map visualizer, simulation visualizer
