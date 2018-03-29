@@ -2,7 +2,6 @@ language: go
 go_import_path: github.com/bert42/alien-invasion
 go:
   - 1.10.x
-  - tip
 sudo: false
 install:
   - go get github.com/davecgh/go-spew/spew
