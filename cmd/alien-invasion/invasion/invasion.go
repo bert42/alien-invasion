@@ -32,7 +32,10 @@ type Invasion struct {
     VerboseLog []string
     DebugLog []string
     Iteration int
-    MaxCities int
+    Statistics struct {
+        MaxCities int
+        NumberOfMoves int
+    }
 }
 
 // New constructs a new Invasion, sets up default values
@@ -43,7 +46,6 @@ func New() *Invasion {
         VerboseLog: make([]string, 0),
         DebugLog: make([]string, 0),
         Iteration: 0,
-        MaxCities: 0,
     }
 }
 
@@ -52,14 +54,32 @@ func (data *Invasion) Run(numAliens int, iterations int) {
     data.verbose(fmt.Sprintf("Deploying %d aliens into cities...", numAliens))
     data.Deploy(numAliens)
 
+    defer data.PrintStatistics()
+
     for data.Iteration = 1; data.Iteration < iterations; data.Iteration++ {
         data.Move()
         if isAny := data.AnyCitiesLeft(); !isAny {
-            data.Print(fmt.Sprintf("all cities (%d) have been destroyed", data.MaxCities))
+            data.Print(fmt.Sprintf("all cities (%d) have been destroyed", data.Statistics.MaxCities))
             return
         }
     }
     data.Print(fmt.Sprintf("simulation terminated after %d iterations", data.Iteration))
+}
+
+func (data *Invasion) PrintStatistics() {
+    cities := data.AllCities()
+    var citiesStr string // just to make it beautiful for singular/plural
+    if data.Statistics.MaxCities-len(cities) == 1 {
+        citiesStr = "city was"
+    } else {
+        citiesStr = "cities were"
+    }
+
+
+    data.Print("Statistics:\n")
+    data.Print(fmt.Sprintf("\tnumber of moves executed: %d", data.Statistics.NumberOfMoves))
+    data.Print(fmt.Sprintf("\t%d %s destroyed out of %d, %d remained",
+        data.Statistics.MaxCities-len(cities), citiesStr, data.Statistics.MaxCities, len(cities)))
 }
 
 // ReadMap reads in data from map file, removes line endings, returns all lines
@@ -99,6 +119,9 @@ func (data *Invasion) BuildMap(fileName string) {
     for _, line := range mapLines {
         s := strings.Split(line, " ")
         cityName := s[0]
+        if _, cityExists := cities[cityName]; cityExists {
+            log.Fatalf("City '%s' is redefined in map, it's not supported, yet", cityName)
+        }
         city := &City{
             Name:  cityName,
             Roads: make(map[int]string),
@@ -113,9 +136,9 @@ func (data *Invasion) BuildMap(fileName string) {
     }
 
     data.Map = cities
-    data.MaxCities = len(data.AllCities())
+    data.Statistics.MaxCities = len(data.AllCities())
     if err := data.ValidateRoads(); err != nil {
-        log.Fatalf(err.Error())
+        log.Fatal(err.Error())
     }
 }
 
@@ -172,7 +195,7 @@ func (data *Invasion) Move() {
 
     for _, cityName := range allCities {
         if city, ok := data.Map[cityName]; ok {
-            if city.Alien == 0 { //no alien here to move
+            if city.Alien == 0 { // no alien here to move
                 continue
             }
             if roads := AllRoads(city); len(roads) > 0 { // there are still roads out of this city
@@ -188,6 +211,7 @@ func (data *Invasion) Move() {
 // MoveAlienTo moves alien into a City, calls destroy if another alien is already there
 func (data *Invasion) MoveAlienTo(cityName string, alien int) {
     city := data.Map[cityName]
+    data.Statistics.NumberOfMoves++
 
     if city.Alien == 0 { // no alien in this city yet, move him in
         city.Alien = alien
