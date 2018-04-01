@@ -6,7 +6,7 @@ import (
     "sort"
 )
 
-const mapfile1 = "../../../examples/testmap1.txt"
+const mapfile1 = "../../examples/testmap1.txt"
 
 var simulation *Invasion
 
@@ -56,12 +56,12 @@ func TestDeploy(t *testing.T) {
 
 func TestMove(t *testing.T) {
     aliensBefore := citiesWithAliens(simulation)
-t.Log(aliensBefore)
+
     simulation.Move()
     t.Log("Move ran ok")
 
     aliensAfter := citiesWithAliens(simulation)
-t.Log(aliensAfter)
+
     if compareSlices(aliensBefore, aliensAfter) {
         t.Fatal("Simulation Move() left aliens in the same cities, should not happen")
     }

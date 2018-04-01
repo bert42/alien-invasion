@@ -97,6 +97,11 @@ func (data *Invasion) BuildMap(fileName string) {
     for _, line := range mapLines {
         s := strings.Split(line, " ")
         cityName := s[0]
+
+        if len(cityName) == 0 || cityName[0:1] == "#" {
+            continue
+        }
+
         if _, cityExists := cities[cityName]; cityExists {
             log.Fatalf("City '%s' is redefined in map, it's not supported, yet", cityName)
         }
@@ -170,19 +175,30 @@ func (data *Invasion) Deploy(numAliens int) {
 // Move iterates over all cities and moves aliens if any road is still present in that city
 func (data *Invasion) Move() {
     allCities := data.AllCities()
+    moveCache := make(map[string]bool, 0) // prevent back and forth move between neighbouring cities
 
     for _, cityName := range allCities {
-        if city, ok := data.Map[cityName]; ok {
-            if city.Alien == 0 { // no alien here to move
-                continue
-            }
-            if roads := AllRoads(city); len(roads) > 0 { // there are still roads out of this city
-                directionIndex := rand.Intn(len(roads))
-                cityTo := city.Roads[roads[directionIndex]]
-                data.MoveAlienTo(cityTo, city.Alien)
-                city.Alien = 0 // moved out from this city
-            }
-        } // else this city has been already destroyed in movements phase
+        city, exists := data.Map[cityName];
+        if !exists { // this city has been already destroyed in movements phase
+            continue
+        }
+        if _, exists := moveCache[cityName]; exists { // already moved into this one
+            continue
+        }
+        if city.Alien == 0 { // no alien here to move
+            continue
+        }
+
+        targets := data.TargetCitiesFrom(city)
+        if len(targets) == 0 { // no roads out of this city
+            continue
+        }
+
+        directionIndex := rand.Intn(len(targets))
+        cityTo := targets[directionIndex]
+        data.MoveAlienTo(cityTo, city.Alien)
+        city.Alien = 0 // moved out from this city
+        moveCache[cityTo] = true
     }
 }
 
@@ -196,6 +212,17 @@ func (data *Invasion) MoveAlienTo(cityName string, alien int) {
     } else { // already an alien here, so they fight and destroy this city
         data.DestroyCity(cityName, city.Alien, alien)
     }
+}
+
+// TargetCitiesFrom returns all cities reachable from current one
+func (data *Invasion) TargetCitiesFrom(city *City) (cities []string) {
+    for direction := 0; direction < 4; direction++ {
+        if cityName, exists := city.Roads[direction]; exists {
+            cities = append(cities, cityName)
+        }
+    }
+
+    return cities
 }
 
 // AnyCitiesLeft returns false if all of the cities have been destroyed

@@ -1,3 +1,4 @@
+# This is a test comment
 Foo north=Bar west=Baz south=Qu-ux
 Bar south=Foo west=Bee
 Qu-ux north=Foo

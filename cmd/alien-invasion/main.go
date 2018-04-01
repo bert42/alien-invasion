@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"./invasion"
+	"invasion"
 )
 
 func main() {

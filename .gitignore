@@ -1,6 +1,6 @@
 bin/
 pkg/
-src/
+src/github.com/
 
 # Binaries for programs and plugins
 *.exe

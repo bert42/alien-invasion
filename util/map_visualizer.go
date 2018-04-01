@@ -6,7 +6,7 @@ import (
     "os"
     "github.com/kr/pretty"
 
-    "../cmd/alien-invasion/invasion"
+    "invasion"
 )
 
 func main() {
