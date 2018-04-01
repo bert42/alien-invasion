@@ -13,8 +13,7 @@ Also, set the current GOPATH to the current dir and let Go install required libr
 ```
 git clone https://github.com/bert42/alien-invasion
 cd alien-invasion
-export GOPATH=`pwd`
-go get ./...
+go get -d -v ./...
 ```
 
 ## Getting started
@@ -115,7 +114,7 @@ $ go run util/map_visualizer.go -map examples/testmap1.txt
 Simple Go tests are provided for invasion package:
 
 ```
-go test -v cmd/alien-invasion/*test.go
+go test ./cmd/...
 ```
 
 You can check the status of latest Travis builds at https://travis-ci.org/bert42/alien-invasion
