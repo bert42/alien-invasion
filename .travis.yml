@@ -4,8 +4,7 @@ go:
   - 1.10.x
 sudo: false
 install:
-  - go get github.com/davecgh/go-spew/spew
-  - go build cmd/alien-invasion/main.go
+  - go get -d -v ./...
 script:
   - go test ./cmd/...
 after_success:
