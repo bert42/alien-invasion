@@ -1,16 +1,14 @@
-package invasion_test
+package invasion
 
 import (
     "testing"
     "os"
     "sort"
-
-    "./invasion"
 )
 
-const mapfile1 = "../../examples/testmap1.txt"
+const mapfile1 = "../../../examples/testmap1.txt"
 
-var simulation *invasion.Invasion
+var simulation *Invasion
 
 
 func TestBuildMap(t *testing.T) {
@@ -18,7 +16,7 @@ func TestBuildMap(t *testing.T) {
         t.Fatalf("Unable to open test map %s", mapfile1)
     }
 
-    simulation = invasion.New()
+    simulation = New()
     simulation.BuildMap(mapfile1)
 
     cities := simulation.AllCities()
@@ -28,13 +26,13 @@ func TestBuildMap(t *testing.T) {
 }
 
 func TestDirections(t *testing.T) {
-    city := invasion.City{
+    city := City{
         Name: "Foobar",
         Roads: map[int]string{1: "Blah", 3: "Huhh"},
         Alien: 0,
     }
 
-    roads := invasion.AllRoads(&city)
+    roads := AllRoads(&city)
     if len(roads) != 2 {
         t.Fatalf("Number of roads differ, got: %d, want: %d", len(roads), 2)
     }
@@ -81,7 +79,7 @@ func TestDestroyCity(t *testing.T) {
 // utility functions
 
 // citiesWithAliens returns all city names with Aliens in it
-func citiesWithAliens(simulation *invasion.Invasion) (result []string) {
+func citiesWithAliens(simulation *Invasion) (result []string) {
     for _, cityName := range simulation.AllCities() {
         if alienID := simulation.Map[cityName].Alien; alienID != 0 {
             result = append(result, cityName)
