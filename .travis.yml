@@ -7,7 +7,7 @@ install:
   - go get github.com/davecgh/go-spew/spew
   - go build cmd/alien-invasion/main.go
 script:
-  - go test -v cmd/alien-invasion/invasion_test.go
+  - go test ./cmd/...
 after_success:
   - go get -v github.com/mattn/goveralls
   - goveralls -coverprofile=profile.cov -service=travis-ci
