@@ -4,13 +4,11 @@
 package invasion
 
 import (
-    "bufio"
     "fmt"
-    "io"
+    "io/ioutil"
     "log"
     "math/rand"
     "time"
-    "os"
     "strings"
     "errors"
 
@@ -82,37 +80,17 @@ func (data *Invasion) PrintStatistics() {
         data.Statistics.MaxCities-len(cities), citiesStr, data.Statistics.MaxCities, len(cities)))
 }
 
-// ReadMap reads in data from map file, removes line endings, returns all lines
-func (data *Invasion) ReadMap(fileName string) (result []string) {
-    file, err := os.Open(fileName)
+// BuildMap reads map file and builds map struct from lines into Cities, stores map data in Invasion.Map
+func (data *Invasion) BuildMap(fileName string) {
+    contents, err := ioutil.ReadFile(fileName)
     if err != nil {
         log.Fatal(err)
     }
-    defer file.Close()
 
-    reader := bufio.NewReader(file)
-    for {
-        line, err := reader.ReadString('\n')
-
-        if err != nil {
-            if err == io.EOF {
-                break
-            } else {
-                log.Fatalf("Can't read %s: %s", fileName, err.Error())
-            }
-        }
-
-        line = strings.TrimSuffix(line, "\n");
+    mapLines := strings.Split(string(contents[:]), "\n")
+    for _, line := range mapLines {
         line = strings.TrimSuffix(line, "\r");
-        result = append(result, line)
     }
-
-    return result
-}
-
-// BuildMap builds map struct from lines into Cities, stores map data in Invasion.Map
-func (data *Invasion) BuildMap(fileName string) {
-    mapLines := data.ReadMap(fileName)
 
     cities := make(map[string]*City)
 
