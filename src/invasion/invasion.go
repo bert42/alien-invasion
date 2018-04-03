@@ -130,14 +130,18 @@ func (data *Invasion) BuildMap(fileName string) {
 func (data *Invasion) ValidateRoads() error {
     for _, city := range data.Map {
         for _, direction := range AllRoads(city) {
-            if toCityName, toOk := city.Roads[direction]; toOk {
-                if toCity, toCityOk := data.Map[toCityName]; toCityOk {
-                    if toCity.Roads[oppositeDirection(direction)] != city.Name {
-                        return errors.New(fmt.Sprintf("Map validation error: no back-road to %s from %s, but should be", toCity.Roads[oppositeDirection(direction)], city.Name))
-                    }
-                } else {
-                    return errors.New(fmt.Sprintf("Map validation error: road to %s from %s, but %s not found on map", toCityName, city.Name, toCityName))
-                }
+            toCityName, toExists := city.Roads[direction]
+            if !toExists {
+                continue
+            }
+
+            toCity, toCityOk := data.Map[toCityName];
+            if !toCityOk {
+                return errors.New(fmt.Sprintf("Map validation error: road to %s from %s, but %s not found on map", toCityName, city.Name, toCityName))
+            }
+
+            if toCity.Roads[oppositeDirection(direction)] != city.Name {
+                return errors.New(fmt.Sprintf("Map validation error: no back-road to %s from %s, but should be", toCity.Roads[oppositeDirection(direction)], city.Name))
             }
         }
     }
