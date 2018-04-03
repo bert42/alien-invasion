@@ -90,6 +90,54 @@ $ go run cmd/alien-invasion/main.go -map examples/testmap25x25.txt -aliens 51
 2018/03/29 22:45:57 [iter 10000]    25 cities were destroyed out of 625, 600 remained
 ```
 
+## Using a Docker container
+
+The provided Dockerfile helps you run the simulation in a dedicated container holding all libraries needed.
+An example Docker build and run:
+
+```
+$ docker build .
+Sending build context to Docker daemon  233.5kB
+Step 1/7 : FROM golang:1.10
+ ---> d632bbfe5767
+Step 2/7 : WORKDIR /go/src/app
+ ---> Using cache
+ ---> bbd7861fe64b
+Step 3/7 : COPY . .
+ ---> c5ea32f34268
+Removing intermediate container 2b59875e044f
+Step 4/7 : ENV GOPATH /go/src/app
+ ---> Running in 941daed8540f
+ ---> 1a8319738046
+Removing intermediate container 941daed8540f
+Step 5/7 : ENV GOBIN /go/src/app/bin
+ ---> Running in cc7b136ac184
+ ---> 757a8f3f795c
+Removing intermediate container cc7b136ac184
+Step 6/7 : RUN go get -d -v ./... && go install -v cmd/alien-invasion/main.go
+ ---> Running in 528145003c6a
+github.com/davecgh/go-spew (download)
+github.com/kr/pretty (download)
+github.com/kr/text (download)
+github.com/davecgh/go-spew/spew
+invasion
+command-line-arguments
+ ---> b7aad02d67c4
+Removing intermediate container 528145003c6a
+Step 7/7 : CMD bin/main
+ ---> Running in 390a2db044c0
+ ---> 262837db3f94
+Removing intermediate container 390a2db044c0
+Successfully built 262837db3f94
+
+$ docker run 262837db3f94
+2018/04/03 09:06:55 [iter     0] Qu-ux has been destroyed by alien 1 and alien 2
+2018/04/03 09:06:55 [iter 10000] simulation terminated after 10000 iterations
+2018/04/03 09:06:55 [iter 10000] Statistics:
+2018/04/03 09:06:55 [iter 10000]        number of moves executed: 10002
+2018/04/03 09:06:55 [iter 10000]        1 city was destroyed out of 5, 4 remained
+```
+
 ## Utilities
 
 The util/ directory contains some utility scripts: a full-mesh **map generator** (you
