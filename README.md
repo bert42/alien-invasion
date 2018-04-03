@@ -13,7 +13,10 @@ Also, set the current GOPATH to the current dir and let Go install required libr
 ```
 git clone https://github.com/bert42/alien-invasion
 cd alien-invasion
+export GOPATH=`pwd`
 go get -d -v ./...
+
+go run cmd/alien-invasion/main.go --map examples/testmap1.txt --aliens 3
 ```
 
 ## Getting started
